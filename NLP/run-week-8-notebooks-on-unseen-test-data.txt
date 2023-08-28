@@ -1,0 +1,37 @@
+# add this cell into your week 8 notebooks (after the cell where you train the classifier)
+# this will test your model on unseen data. The test set comes from a time period after the train set.
+
+test_dataset = fetch_20newsgroups(subset='test', remove=('headers', 'footers', 'quotes'), categories=cats)
+
+y_predicted = pipeline.predict(test_dataset.data)
+
+# print report
+print('Evaluation metrics')
+print('==================')
+print(metrics.classification_report(test_dataset.target, y_predicted, target_names = dataset.target_names))
+cm = metrics.confusion_matrix(y_true=test_dataset.target, y_pred=y_predicted, labels=[0, 1])
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=dataset.target_names)
+disp = disp.plot(include_values=True, cmap='Blues', ax=None, xticks_rotation='vertical')
+plt.show()
+
+vect = pipeline.steps[0][1]
+clf = pipeline.steps[1][1]
+
+print()
+
+logodds=clf.feature_log_prob_[1]-clf.feature_log_prob_[0]
+
+print("Features most indicative of",dataset.target_names[0])
+print('============================' + '='*len(dataset.target_names[0]))
+for i in numpy.argsort(logodds)[:20]:
+    print(vect.get_feature_names()[i], end=' ')
+print()
+print()
+
+print("Features most indicative of",dataset.target_names[1])
+print('============================' + '='*len(dataset.target_names[1]))
+for i in numpy.argsort(-logodds)[:20]:
+    print(vect.get_feature_names()[i], end=' ')
+    
+lookup = dict((v,k) for k,v in vect.vocabulary_.items())
